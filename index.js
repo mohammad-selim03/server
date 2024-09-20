@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const serverless = require('serverless-http');
+// const serverless = require('serverless-http');
 const multer = require('multer');
 const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -35,21 +35,21 @@ const connectToMongoDB = async () => {
 };
 
 // Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage: storage });
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'public/uploads');
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   },
+// });
+// const upload = multer({ storage: storage });
+// app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// API routes
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
+// // API routes
+// app.get('/', (req, res) => {
+//   res.send('Server is running!');
+// });
 
 // app.get('/animals', async (req, res) => {
 //   try {
