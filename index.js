@@ -10,22 +10,28 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB client setup
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.oy7jbnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-let client = null;
+// MongoDB client setup with caching
+let client;
+let cachedDb = null;
 
 const connectToMongoDB = async () => {
+  if (cachedDb) {
+    return cachedDb;
+  }
   if (!client) {
-    client = new MongoClient(uri, {
+    client = new MongoClient(process.env.MONGODB_URI, {
       serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
         deprecationErrors: true,
       },
     });
+  }
+  if (!client.isConnected()) {
     await client.connect();
   }
-  return client.db('AnimalDatabase');
+  cachedDb = client.db('AnimalDatabase');
+  return cachedDb;
 };
 
 // Multer setup for file uploads
@@ -42,7 +48,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API routes
 app.get('/', (req, res) => {
-  res.send('Server is runningggggggggggggggggg!');
+  res.send('Server is running!');
 });
 
 app.get('/api/animals', async (req, res) => {
