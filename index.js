@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const serverless = require('serverless-http');
-const multer = require('multer');
-const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 
@@ -11,51 +9,35 @@ app.use(express.json());
 app.use(cors());
 
 // MongoDB client setup with caching
-let client;
-let cachedDb = null;
+let cachedClient = null;
 
 const connectToMongoDB = async () => {
-  if (cachedDb) {
-    return cachedDb;
+  if (cachedClient) {
+    return cachedClient;
   }
-  if (!client) {
-    client = new MongoClient(process.env.MONGODB_URI, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-    });
-  }
-  if (!client.isConnected()) {
-    await client.connect();
-  }
-  cachedDb = client.db('AnimalDatabase');
-  return cachedDb;
-};
 
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage: storage });
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+  cachedClient = new MongoClient(process.env.MONGODB_URI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
+
+  await cachedClient.connect();
+  console.log('Connected to MongoDB');
+  return cachedClient.db('AnimalDatabase');
+};
 
 // API routes
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-app.get('/api/animals', async (req, res) => {
+app.get('/animals', async (req, res) => {
   try {
     const db = await connectToMongoDB();
-    const animalCollection = db.collection('animals');
-    const animals = await animalCollection.find({}).toArray();
+    const animals = await db.collection('animals').find({}).toArray();
     res.status(200).json(animals);
   } catch (error) {
     console.error('Error fetching animals:', error);
@@ -63,11 +45,10 @@ app.get('/api/animals', async (req, res) => {
   }
 });
 
-app.get('/api/categories', async (req, res) => {
+app.get('/categories', async (req, res) => {
   try {
     const db = await connectToMongoDB();
-    const categoryCollection = db.collection('categories');
-    const categories = await categoryCollection.find({}).toArray();
+    const categories = await db.collection('categories').find({}).toArray();
     res.status(200).json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -75,10 +56,9 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-app.post('/api/animals', upload.single('image'), async (req, res) => {
+app.post('/animals', async (req, res) => {
   try {
-    const { name } = req.body;
-    const image = req.file;
+    const { name, image } = req.body;
 
     if (!name || !image) {
       return res.status(400).json({ message: 'Name and image are required.' });
@@ -87,7 +67,7 @@ app.post('/api/animals', upload.single('image'), async (req, res) => {
     const newAnimal = {
       name: name,
       image: {
-        path: `/uploads/${image.filename}`,
+        path: image.path, // Cloud-based path would be preferred
         contentType: image.mimetype,
       },
       createdAt: new Date(),
@@ -106,7 +86,7 @@ app.post('/api/animals', upload.single('image'), async (req, res) => {
   }
 });
 
-app.post('/api/categories', async (req, res) => {
+app.post('/categories', async (req, res) => {
   try {
     const { name } = req.body;
 
