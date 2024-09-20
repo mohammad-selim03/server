@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB client setup with caching
+MongoDB client setup with caching
 let client;
 let cachedDb = null;
 
