@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const serverless = require('serverless-http');
 const multer = require('multer');
 const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -10,10 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("fuck")
-})
-
+// MongoDB connection logic
 let client;
 let cachedDb = null;
 
@@ -37,6 +33,7 @@ const connectToMongoDB = async () => {
   return cachedDb;
 };
 
+// Multer storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads');
@@ -45,6 +42,7 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
+
 const upload = multer({ storage: storage });
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
@@ -140,4 +138,10 @@ app.post('/categories', async (req, res) => {
   }
 });
 
-module.exports.handler = serverless(app);
+// Start the server locally (for local development)
+const port = process.env.PORT || 10000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+module.exports = app;
