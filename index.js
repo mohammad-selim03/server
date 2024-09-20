@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-// const serverless = require('serverless-http');
+const serverless = require('serverless-http');
 const multer = require('multer');
 const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -140,4 +140,4 @@ app.post('/categories', async (req, res) => {
   }
 });
 
-// module.exports.handler = serverless(app);
+module.exports.handler = serverless(app);
