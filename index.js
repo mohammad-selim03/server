@@ -11,28 +11,28 @@ app.use(express.json());
 app.use(cors());
 
 
-let client;
-let cachedDb = null;
+// let client;
+// let cachedDb = null;
 
-const connectToMongoDB = async () => {
-  if (cachedDb) {
-    return cachedDb;
-  }
-  if (!client) {
-    client = new MongoClient(process.env.MONGODB_URI, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-    });
-  }
-  if (!client.isConnected()) {
-    await client.connect();
-  }
-  cachedDb = client.db('AnimalDatabase');
-  return cachedDb;
-};
+// const connectToMongoDB = async () => {
+//   if (cachedDb) {
+//     return cachedDb;
+//   }
+//   if (!client) {
+//     client = new MongoClient(process.env.MONGODB_URI, {
+//       serverApi: {
+//         version: ServerApiVersion.v1,
+//         strict: true,
+//         deprecationErrors: true,
+//       },
+//     });
+//   }
+//   if (!client.isConnected()) {
+//     await client.connect();
+//   }
+//   cachedDb = client.db('AnimalDatabase');
+//   return cachedDb;
+// };
 
 // Multer setup for file uploads
 // const storage = multer.diskStorage({
