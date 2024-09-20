@@ -27,6 +27,7 @@ const connectToMongoDB = async () => {
   }
   if (!client.topology || !client.topology.isConnected()) {
     await client.connect();
+    console.log('Successfully connected to MongoDB');
   }
   cachedDb = client.db('AnimalDatabase');
   return cachedDb;
@@ -47,6 +48,20 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // API routes
 app.get('/', (req, res) => {
   res.send('Server is running!');
+});
+
+// mongodb connection check on vercel...
+app.get('/test-db-connection', async (req, res) => {
+  try {
+    const db = await connectToMongoDB();
+    if (db) {
+      res.status(200).json({ message: 'MongoDB connection successful!' });
+    } else {
+      res.status(500).json({ message: 'Failed to connect to MongoDB.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'MongoDB connection error.', error: error.message });
+  }
 });
 
 app.get('/animals', async (req, res) => {
