@@ -9,7 +9,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB connection logic
 let client;
 let cachedDb = null;
 
@@ -26,14 +25,13 @@ const connectToMongoDB = async () => {
       },
     });
   }
-  if (!client.isConnected()) {
+  if (!client.topology || !client.topology.isConnected()) {
     await client.connect();
   }
   cachedDb = client.db('AnimalDatabase');
   return cachedDb;
 };
 
-// Multer storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads');
@@ -68,6 +66,7 @@ app.get('/categories', async (req, res) => {
     const db = await connectToMongoDB();
     const categoryCollection = db.collection('categories');
     const categories = await categoryCollection.find({}).toArray();
+    console.log("categories", categories)
     res.status(200).json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
